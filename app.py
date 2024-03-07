@@ -102,7 +102,7 @@ def _auth_login() -> str | Response:
 
 @authBlueprint.route("/logout", methods=["GET"])
 @authBlueprint.route("/logout/", methods=["GET"])
-def _auth_logout(condition: str | None = None) -> Response:
+def _auth_logout(condition: str | None = None) -> str:
     """
     The logout page. This is where the user can log out of their account.
 

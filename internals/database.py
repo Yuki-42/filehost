@@ -1,6 +1,7 @@
 """
 Contains the database class for the application.
 """
+from io import BytesIO
 
 # Third Party Imports
 from psycopg2 import connect, sql
@@ -9,6 +10,7 @@ from psycopg2.extensions import connection as Connection, cursor as Cursor
 
 # Local Imports
 from .logging import createLogger, SuppressedLoggerAdapter
+from .models.file import File
 from .models.user import User
 
 
@@ -171,10 +173,53 @@ class Database:
         cursor: Cursor = self.connection.cursor()
 
         # Execute query
-        cursor.execute("SELECT * FROM users WHERE id = %s", (id,))
+        cursor.execute("SELECT * FROM users WHERE id = ?", (id,))
 
         # Fetch one result
         result: tuple = cursor.fetchone()
         cursor.close()
 
         return result is not None
+    
+    """
+================================================================================================================================================================
+        File
+================================================================================================================================================================
+    """
+    
+    def getFile(self, id: int) -> File | None:
+        """
+        Get a file from the database by its id.
+
+        Args:
+            id (int): The id of the file to get.
+
+        Returns:
+            File: The file with the given id.
+        """
+
+        # Create cursor
+        cursor: Cursor = self.connection.cursor()
+
+        # Execute query
+        cursor.execute("SELECT * FROM files WHERE id = ?", (id,))
+
+        # Fetch one result
+        result: tuple = cursor.fetchone()
+
+        # Get the user
+        user: User = self.getUser(result[3])
+
+        # Get the file
+        if result[5] == 1:
+            cursor.execute("SELECT data FROM small_files WHERE id = ?", (id,))
+        else:
+            cursor.execute("SELECT data FROM large_files WHERE id = ?", (id,))
+
+        file: BytesIO = BytesIO(cursor.fetchone()[0])
+        cursor.close()
+
+        return File(result[0], result[1], result[2], result[3], result[4], result[5], result[6], result[7], file, user) if result else None
+
+
+
