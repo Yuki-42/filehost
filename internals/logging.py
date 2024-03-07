@@ -265,7 +265,7 @@ class EndpointLoggerAdapter(LoggerAdapter):
         self.log(
             INFO,
             f"Request from {request.remote_addr} to {request.path} with method {request.method} "
-            f"and headers {request.headers} from user agent {request.user_agent}"
+            f" from user agent {request.user_agent}"
         )
 
 
