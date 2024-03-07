@@ -1,0 +1,20 @@
+{% extends "_base.html" %}
+
+{% block title %}Logged Out{% endblock %}
+{% block stylesheets %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/error.css') }}">
+{% endblock %}
+
+{% block content %}
+    <div class="centeredForm">
+        <h1 class="center">Logged Out</h1>
+        <br><br>
+        {% if condition %}
+            <p class="center">{{ condition }}</p>
+        {% endif %}
+        <br><br>
+        <form action="{{ url_for("_index") }}" class="center">
+            <button type="submit">Return Home</button>
+        </form>
+    </div>
+{% endblock %}
