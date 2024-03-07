@@ -5,7 +5,7 @@ App file for filehost project.
 from secrets import token_urlsafe as tokenUrlSafe
 
 # Third Party Imports
-from flask import Flask, render_template as renderTemplate, Blueprint, Response, request, session
+from flask import Flask, render_template as renderTemplate, Blueprint, Response, request, session, redirect, url_for as urlFor
 from flask_wtf import CSRFProtect
 from flask.sessions import SessionMixin
 
@@ -59,10 +59,29 @@ def _cookieCheck(data: SessionMixin) -> str:
     if user.banned:
         return "Banned"
 
-    if "2fa" not in data and user.otp != "":
+    if "2fa" not in data and user.otpKey != "":
         return "2FA Required"
 
     return "Valid"
+
+
+def _verifyForm(form: dict, fields: list) -> tuple[bool, str]:
+    """
+    Verify that the form has all the required fields.
+
+    Args:
+        form (dict): The form to check.
+        fields (list): The fields to check for.
+
+    Returns:
+        bool: If the form is valid.
+    """
+    # Check if the form has all the required fields
+    for field in fields:
+        if field not in form:
+            return False, f"Missing field: {field}"
+
+    return True, ""
 
 
 @app.route("/")
@@ -98,6 +117,39 @@ def _auth_login() -> str | Response:
     # Handle GET first
     if request.method == "GET":
         return renderTemplate("auth/login.html")
+
+    # Request is POST
+    formFields: list = ["email", "password", "2fa"]
+    formValid, formError = _verifyForm(request.form, formFields)
+
+    if not formValid:
+        return renderTemplate("auth/login.html", error=formError)
+
+    # Get the user
+    user: User = database.getUserByEmail(request.form["email"])
+
+    # Ensure the user exists
+    if user is None:
+        return renderTemplate("auth/login.html", error="Invalid Email")
+
+    # Ensure the user is not banned
+    if user.banned:
+        return renderTemplate("auth/login.html", error="Banned")
+
+    # Ensure the password is correct
+    if not user.checkPassword(request.form["password"]):
+        return renderTemplate("auth/login.html", error="Invalid Password")
+
+    # Verify 2FA
+    if not user.otp.verify(request.form["2fa"]) or user.lastOtp == request.form["2fa"]:
+        return renderTemplate("auth/login.html", error="Invalid 2FA")
+
+    # Set the session
+    session["id"] = user.id
+    session["2fa"] = True
+
+    # Redirect to the index
+    return redirect(urlFor("_index"))
 
 
 @authBlueprint.route("/logout", methods=["GET"])
