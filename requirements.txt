@@ -3,3 +3,4 @@ psycopg2
 python-dotenv
 passlib
 Flask-WTF
+pyotp
