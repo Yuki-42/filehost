@@ -5,6 +5,9 @@ Contains the User class.
 # Standard Library Imports
 from datetime import datetime
 
+# Third Party Imports
+from passlib.hash import pbkdf2_sha512 as hashing
+
 
 class User:
     """
@@ -58,5 +61,16 @@ class User:
         self.admin = accessLevel == 2
         self.otp = otp
         self.lastOtp = lastOtp
-        print(type(createdAt))
         self.createdAt = createdAt
+
+    def checkPassword(self, password: str) -> bool:
+        """
+        Check if the password is correct.
+
+        Args:
+            password (str): The password to check.
+
+        Returns:
+            bool: If the password is correct.
+        """
+        return hashing.verify(password, self.password)
