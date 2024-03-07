@@ -180,6 +180,46 @@ class Database:
         cursor.close()
 
         return result is not None
+
+    def getUserByEmail(self, email: str) -> User | None:
+        """
+        Get a user from the database by their email.
+
+        Args:
+            email (str): The email of the user to get.
+
+        Returns:
+            User: The user with the given email.
+        """
+        # Create cursor
+        cursor: Cursor = self.connection.cursor()
+
+        # Execute query
+        cursor.execute("SELECT * FROM users WHERE email = ?", (email,))
+
+        # Fetch one result
+        result: tuple = cursor.fetchone()
+        cursor.close()
+
+        return User(*result) if result else None
+
+    def setUserLastOtp(self, code: str, id: int) -> None:
+        """
+        Set the last OTP of a user in the database.
+
+        Args:
+            code (str): The OTP code to set.
+            id (int): The id of the user.
+        """
+        # Create cursor
+        cursor: Cursor = self.connection.cursor()
+
+        # Execute query
+        cursor.execute("UPDATE users SET last_otp = ? WHERE id = ?", (code, id))
+
+        # Commit
+        self.connection.commit()
+        cursor.close()
     
     """
 ================================================================================================================================================================
