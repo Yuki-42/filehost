@@ -7,6 +7,7 @@ from datetime import datetime
 
 # Third Party Imports
 from passlib.hash import pbkdf2_sha512 as hashing
+from pyotp import TOTP
 
 
 class User:
@@ -19,12 +20,15 @@ class User:
     email: str
     password: str
     username: str
+    accessLevel: int
     banned: bool
     moderator: bool
     admin: bool
-    otp: str
+    otpKey: str
+    otp: TOTP
     lastOtp: int
     createdAt: datetime
+
 
     def __init__(
             self,
@@ -46,8 +50,8 @@ class User:
             password (str): User password.
             username (str): User username.
             accessLevel (int): User access level.
-            otp (str): User otp.
-            lastOtp (int): User last otp.
+            otp (str): User otpKey.
+            lastOtp (int): User last otpKey.
             createdAt (str): User created at.
         """
 
@@ -56,10 +60,12 @@ class User:
         self.email = email
         self.password = password
         self.username = username
+        self.accessLevel = accessLevel
         self.banned = accessLevel == -1
         self.moderator = accessLevel == 1
         self.admin = accessLevel == 2
-        self.otp = otp
+        self.otpKey = otp
+        self.otp = TOTP(otp)
         self.lastOtp = lastOtp
         self.createdAt = createdAt
 
