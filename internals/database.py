@@ -203,19 +203,37 @@ class Database:
 
         return User(*result) if result else None
 
-    def setUserLastOtp(self, code: str, id: int) -> None:
+    def setUserLastOtp(self, id: int, code: str) -> None:
         """
         Set the last OTP of a user in the database.
 
         Args:
-            code (str): The OTP code to set.
             id (int): The id of the user.
+            code (str): The OTP code to set.
         """
         # Create cursor
         cursor: Cursor = self.connection.cursor()
 
         # Execute query
         cursor.execute("UPDATE users SET last_otp = ? WHERE id = ?", (code, id))
+
+        # Commit
+        self.connection.commit()
+        cursor.close()
+
+    def setUserOtpKey(self, key: str, id: int) -> None:
+        """
+        Set the OTP key of a user in the database.
+
+        Args:
+            key (str): The OTP key to set.
+            id (int): The id of the user.
+        """
+        # Create cursor
+        cursor: Cursor = self.connection.cursor()
+
+        # Execute query
+        cursor.execute("UPDATE users SET otp = ? WHERE id = ?", (key, id))
 
         # Commit
         self.connection.commit()
