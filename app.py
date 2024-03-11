@@ -92,6 +92,55 @@ def _verifyForm(form: dict, fields: list) -> tuple[bool, str, int]:
     return True, "", 0
 
 
+@app.before_request
+def _before_request() -> Response | None:
+    """
+    Before request function. Clears invalid sessions and logs the request.
+
+    Returns:
+        None
+    """
+    # Log the request
+    endpointLogger.logRequest(request)
+
+    # Clear invalid sessions
+    if len(session) <= 0 or "id" not in session or not database.checkUserExists(session["id"]):
+        session.clear()
+        return
+
+    # Get the user to perform more checks
+    user: User = database.getUser(session["id"])
+
+    if user.banned:
+        session.clear()
+        return redirect(urlFor("auth._auth_logout", condition="Banned"))
+
+    if "2fa" not in session and user.otpKey != "":
+        session.clear()
+        return redirect(urlFor("auth._auth_login"))
+
+    if "2fa" not in session and user.otpKey == "":
+        session.clear()
+        return redirect(urlFor("auth._auth_add_2fa"))
+
+
+@app.after_request
+def _after_request(response: Response) -> Response:
+    """
+    After request function. Logs the response.
+
+    Args:
+        response (Response): The response to log.
+
+    Returns:
+        Response: The response to send.
+    """
+    # Log the response
+    endpointLogger.logResponse(response)
+
+    return response
+
+
 @app.route("/", methods=["GET"])
 def _index() -> str:
     """
