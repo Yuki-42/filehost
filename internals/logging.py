@@ -255,17 +255,18 @@ class EndpointLoggerAdapter(LoggerAdapter):
         if not self.suppressed:
             super().log(level, msg, *args, **kwargs)
 
-    def logRequest(self, request: Request):
+    def logRequest(self, requestData: Request, level: int = INFO):
         """
         Logs the request to the endpoint.
 
         Args:
-            request (Request): The request to log.
+            requestData (Request): The request to log.
+            level (int): The level of the log message.
         """
         self.log(
-            INFO,
-            f"Request from {request.remote_addr} to {request.path} with method {request.method} "
-            f" from user agent {request.user_agent}"
+            level,
+            f"Request from {requestData.remote_addr} to {requestData.path} with method {requestData.method} "
+            f" from user agent {requestData.user_agent}"
         )
 
 

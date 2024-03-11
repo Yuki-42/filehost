@@ -1,0 +1,19 @@
+{% extends "_base.html" %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" href="{{ url_for("static", filename="css/auth.css") }}">
+{% endblock %}
+
+{% block content %}
+    <div class="centered-form">
+        <h2>Add 2fa</h2>
+        <form action="{{ url_for("auth._auth_add_2fa") }}" method="post">
+            <p>Click <a href="{{ key }}">this link</a> to add 2fa to your account.</p>
+            <div class="form-field">
+                <label for="2fa">2fa</label>
+                <input type="text" class="form-control" id="2fa" name="2fa" placeholder="2fa">
+            </div>
+            <button type="submit" class="btn btn-primary">Add 2fa</button>
+        </form>
+    </div>
+{% endblock %}
