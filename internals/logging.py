@@ -11,7 +11,7 @@ from sys import stdout
 from typing import Literal
 
 # Third Party Imports
-from flask import Request, has_request_context, request
+from flask import Request, has_request_context, request, Response
 
 
 def getEscapeCode(
@@ -267,6 +267,19 @@ class EndpointLoggerAdapter(LoggerAdapter):
             level,
             f"Request from {requestData.remote_addr} to {requestData.path} with method {requestData.method} "
             f" from user agent {requestData.user_agent}"
+        )
+
+    def logResponse(self, response: Response, level: int = INFO):
+        """
+        Logs the response from the endpoint.
+
+        Args:
+            response (str): The response to log.
+            level (int): The level of the log message.
+        """
+        self.log(
+            level,
+            f"Response with status code {response.status_code}"
         )
 
 
