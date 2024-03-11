@@ -4,7 +4,7 @@ Contains the database class for the application.
 from io import BytesIO
 
 # Third Party Imports
-from psycopg2 import connect, sql
+from psycopg2 import connect, OperationalError
 from passlib.hash import pbkdf2_sha512 as hashing
 from psycopg2.extensions import connection as Connection, cursor as Cursor
 
@@ -44,14 +44,18 @@ class Database:
         self.logger = createLogger(__name__)
         self.logger.info("Creating database connection...")
 
-        # Create connection
-        self.connection = connect(
-            user=user,
-            password=password,
-            host=host,
-            port=port,
-            database=database
-        )
+        try:
+            # Create connection
+            self.connection = connect(
+                user=user,
+                password=password,
+                host=host,
+                port=port,
+                database=database
+            )
+        except OperationalError as e:
+            self.logger.error(f"Error creating database connection: {e}")
+            raise e
 
     """
 ================================================================================================================================================================
