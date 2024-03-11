@@ -68,6 +68,23 @@ class User:
         self.lastOtp = lastOtp
         self.createdAt = createdAt
 
+    def __dict__(self):
+        return {
+            "id": self.id,
+            "email": self.email,
+            "username": self.username,
+            "accessLevel": self.accessLevel,
+            "banned": self.banned,
+            "moderator": self.moderator,
+            "admin": self.admin,
+            "otpKey": self.otpKey,
+            "lastOtp": self.lastOtp,
+            "createdAt": self.createdAt
+        }
+
+    def __str__(self):
+        return str(self.__dict__())
+
     def checkPassword(self, password: str) -> bool:
         """
         Check if the password is correct.
