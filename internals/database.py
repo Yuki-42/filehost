@@ -114,12 +114,12 @@ class Database:
 
         # Adds the user to the database
         cursor.execute(
-            "INSERT INTO users (email, password, username) VALUES (?, ?, ?) RETURNING id;",
-            [
+            "INSERT INTO users(email, password, username) VALUES (%s, %s, %s) RETURNING id;",
+            (
                 email,
                 hashedPassword,
-                username
-            ]
+                username,
+            )
         )
 
         # Get the uid of the user
@@ -173,7 +173,7 @@ class Database:
         cursor: Cursor = self.connection.cursor()
 
         # Execute query
-        cursor.execute("SELECT * FROM users WHERE id = ?", (id,))
+        cursor.execute("SELECT * FROM users WHERE id = %s;", (id,))
 
         # Fetch one result
         result: tuple = cursor.fetchone()
@@ -195,7 +195,7 @@ class Database:
         cursor: Cursor = self.connection.cursor()
 
         # Execute query
-        cursor.execute("SELECT * FROM users WHERE email = ?", (email,))
+        cursor.execute("SELECT * FROM users WHERE email = %s;", (email,))
 
         # Fetch one result
         result: tuple = cursor.fetchone()
@@ -215,7 +215,7 @@ class Database:
         cursor: Cursor = self.connection.cursor()
 
         # Execute query
-        cursor.execute("UPDATE users SET last_otp = ? WHERE id = ?", (code, id))
+        cursor.execute("UPDATE users SET last_otp = %s WHERE id = %s;", (code, id))
 
         # Commit
         self.connection.commit()
@@ -233,18 +233,18 @@ class Database:
         cursor: Cursor = self.connection.cursor()
 
         # Execute query
-        cursor.execute("UPDATE users SET otp = ? WHERE id = ?", (key, id))
+        cursor.execute("UPDATE users SET otp = %s WHERE id = %s;", (key, id))
 
         # Commit
         self.connection.commit()
         cursor.close()
-    
+
     """
 ================================================================================================================================================================
         File
 ================================================================================================================================================================
     """
-    
+
     def getFile(self, id: int) -> File | None:
         """
         Get a file from the database by its id.
@@ -260,7 +260,7 @@ class Database:
         cursor: Cursor = self.connection.cursor()
 
         # Execute query
-        cursor.execute("SELECT * FROM files WHERE id = ?", (id,))
+        cursor.execute("SELECT * FROM files WHERE id = %s;", (id,))
 
         # Fetch one result
         result: tuple = cursor.fetchone()
@@ -270,9 +270,9 @@ class Database:
 
         # Get the file
         if result[5] == 1:
-            cursor.execute("SELECT data FROM small_files WHERE id = ?", (id,))
+            cursor.execute("SELECT data FROM small_files WHERE id = %s;", (id,))
         else:
-            cursor.execute("SELECT data FROM large_files WHERE id = ?", (id,))
+            cursor.execute("SELECT data FROM large_files WHERE id = %s;", (id,))
 
         file: BytesIO = BytesIO(cursor.fetchone()[0])
         cursor.close()

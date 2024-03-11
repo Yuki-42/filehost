@@ -135,3 +135,69 @@ class Config:
             bool: Debug mode.
         """
         return self.cache.get("DEBUG", "False").lower() == "true"
+
+    @property
+    def email(self) -> dict[str, str | int | bool]:
+        """
+        Email properties.
+
+        Returns:
+            dict[str, str]: Email properties.
+        """
+        return {
+            "user": self.emailUser,
+            "host": self.emailHost,
+            "port": self.emailPort,
+            "secure": self.emailSecure,
+            "password": self.emailPassword
+        }
+
+    @property
+    def emailUser(self) -> str:
+        """
+        Email user.
+
+        Returns:
+            str: Email user.
+        """
+        return self.cache["EMAIL_USER"]
+
+    @property
+    def emailHost(self) -> str:
+        """
+        Email host.
+
+        Returns:
+            str: Email host.
+        """
+        return self.cache["EMAIL_HOST"]
+
+    @property
+    def emailPort(self) -> int:
+        """
+        Email port.
+
+        Returns:
+            int: Email port.
+        """
+        return int(self.cache["EMAIL_PORT"])
+
+    @property
+    def emailSecure(self) -> bool:
+        """
+        Secure email.
+
+        Returns:
+            bool: Secure email.
+        """
+        return self.cache.get("EMAIL_SECURE", "False").lower() == "true"
+
+    @property
+    def emailPassword(self) -> str:
+        """
+        Email password.
+
+        Returns:
+            str: Email password.
+        """
+        return self.cache["EMAIL_PASSWORD"]

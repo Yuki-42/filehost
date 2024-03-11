@@ -29,7 +29,6 @@ class User:
     lastOtp: int
     createdAt: datetime
 
-
     def __init__(
             self,
             id: int,

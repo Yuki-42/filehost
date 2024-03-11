@@ -17,7 +17,7 @@
 
 ```postgresql
 CREATE TABLE IF NOT EXISTS users (
-    id INTEGER NOT NULL PRIMARY KEY,
+    id SERIAL NOT NULL PRIMARY KEY,
     email TEXT NOT NULL,
     password varchar(130) NOT NULL,
     username TEXT NOT NULL,
@@ -47,7 +47,7 @@ The `file_type` column is used to determine if the file is stored in the `small_
 
 ```postgresql
 CREATE TABLE IF NOT EXISTS files (
-    id INTEGER NOT NULL PRIMARY KEY,
+    id SERIAL NOT NULL PRIMARY KEY,
     name TEXT NOT NULL,
     description TEXT,
     author_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -70,7 +70,7 @@ Used to store files that are below 4gb in size. This is done to prevent the data
 
 ```postgresql
 CREATE TABLE IF NOT EXISTS small_files (
-    id INTEGER NOT NULL PRIMARY KEY,
+    id SERIAL NOT NULL PRIMARY KEY,
     data bytea NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
@@ -88,7 +88,7 @@ Used to store files that are above 4gb in size. This is done to prevent the data
 
 ```postgresql
 CREATE TABLE IF NOT EXISTS large_files (
-    id INTEGER NOT NULL PRIMARY KEY,
+    id SERIAL NOT NULL PRIMARY KEY,
     data bytea NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
@@ -107,7 +107,7 @@ CREATE TABLE IF NOT EXISTS large_files (
 
 ```postgresql
 CREATE TABLE IF NOT EXISTS comments (
-    id INTEGER NOT NULL PRIMARY KEY,
+    id SERIAL NOT NULL PRIMARY KEY,
     author_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     file_id INTEGER NOT NULL REFERENCES files(id) ON DELETE CASCADE,
     comment TEXT NOT NULL,
@@ -128,7 +128,7 @@ Used to store what users have access to what files. Only used for files that are
 
 ```postgresql
 CREATE TABLE IF NOT EXISTS access_records (
-    id INTEGER NOT NULL PRIMARY KEY,
+    id SERIAL NOT NULL PRIMARY KEY,
     user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     file_id INTEGER NOT NULL REFERENCES files(id) ON DELETE CASCADE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL

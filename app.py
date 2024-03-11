@@ -1,6 +1,7 @@
 """
 App file for filehost project. 
 """
+from logging import DEBUG
 # Standard Library Imports
 from secrets import token_urlsafe as tokenUrlSafe
 
@@ -8,6 +9,7 @@ from secrets import token_urlsafe as tokenUrlSafe
 from flask import Flask, render_template as renderTemplate, Blueprint, Response, request, session, redirect, url_for as urlFor
 from flask.sessions import SessionMixin
 from pyotp import TOTP, random_base32 as otpKey
+from werkzeug import Response
 
 # Local Imports
 from internals.config import Config
@@ -29,6 +31,7 @@ database: Database = Database(*config.database)
 # Create Flask app
 app: Flask = Flask(__name__)
 app.template_folder = "templates"
+app.debug = config.debug
 
 # Set Key
 app.secret_key = tokenUrlSafe(128) if not config.debug else "debug"
@@ -169,7 +172,6 @@ def _auth_login() -> str | Response:
         Response: The styled login page with the correct messages
         str: The login page
     """
-    endpointLogger.logRequest(request)
 
     # Hande cookie check
     cookieCheck: str = _cookieCheck(session)
@@ -178,17 +180,7 @@ def _auth_login() -> str | Response:
 
     match cookieCheck:
         case "Valid":
-            return redirect(urlFor("_index"))
-        case "2FA Required":
-            return redirect(urlFor("auth._auth_logout", condition="Invalid session data"))
-        case "Banned":
-            return redirect(urlFor("auth._auth_logout", condition="Banned"))
-        case "Invalid User":
-            return redirect(urlFor("auth._auth_logout", condition="Invalid session data"))
-        case "Invalid Session":
-            return redirect(urlFor("auth._auth_logout", condition="Invalid session data"))
-        case "Add 2fa":
-            return redirect(urlFor("auth._auth_2fa_add"))
+            return redirect(urlFor("_index"))  # Logged-in users cannot access the login page
         case "None":
             pass
 
@@ -214,7 +206,7 @@ def _auth_login() -> str | Response:
     if user.otpKey == "" and errorNumber == 2:
         session["id"] = user.id
         session["2fa"] = False
-        return redirect(urlFor("auth._auth_2fa_add"))
+        return redirect(urlFor("auth._auth_add_2fa"))
 
     # Ensure the password is correct
     if not user.checkPassword(request.form["password"]):
@@ -246,24 +238,13 @@ def _auth_register() -> str | Response:
         Response: The styled register page with the correct messages
         str: The register page
     """
-    endpointLogger.logRequest(request)
 
     # Hande cookie check
     cookieCheck: str = _cookieCheck(session)
 
     match cookieCheck:
         case "Valid":
-            return redirect(urlFor("_index"))
-        case "2FA Required":
-            return redirect(urlFor("auth._auth_logout", condition="Invalid session data"))
-        case "Banned":
-            return redirect(urlFor("auth._auth_logout", condition="Banned"))
-        case "Invalid User":
-            return redirect(urlFor("auth._auth_logout", condition="Invalid session data"))
-        case "Invalid Session":
-            return redirect(urlFor("auth._auth_logout", condition="Invalid session data"))
-        case "Add 2fa":
-            return redirect(urlFor("auth._auth_logout", condition="2FA Required"))
+            return redirect(urlFor("_index"))  # Logged-in users cannot access the register page
         case "None":
             pass
 
@@ -296,12 +277,12 @@ def _auth_register() -> str | Response:
     session["id"] = user.id
 
     # Redirect to the index
-    return redirect(urlFor("auth._auth_2fa_add"))
+    return redirect(urlFor("auth._auth_add_2fa"))
 
 
 @authBlueprint.route("/2fa/add", methods=["GET", "POST"])
 @authBlueprint.route("/2fa/add/", methods=["GET", "POST"])
-def _auth_2fa_add() -> str | Response:
+def _auth_add_2fa() -> str | Response:
     """
     The 2FA add page. This is where the user can add 2FA to their account.
 
@@ -309,7 +290,6 @@ def _auth_2fa_add() -> str | Response:
         Response: The styled 2FA add page with the correct messages
         str: The 2FA add page
     """
-    endpointLogger.logRequest(request)
 
     # Hande cookie check
     cookieCheck: str = _cookieCheck(session)
@@ -317,14 +297,6 @@ def _auth_2fa_add() -> str | Response:
     match cookieCheck:
         case "Valid":
             return redirect(urlFor("_index"))
-        case "2FA Required":
-            return redirect(urlFor("auth._auth_logout", condition="Invalid session data"))
-        case "Banned":
-            return redirect(urlFor("auth._auth_logout", condition="Banned"))
-        case "Invalid User":
-            return redirect(urlFor("auth._auth_logout", condition="Invalid session data"))
-        case "Invalid Session":
-            return redirect(urlFor("auth._auth_logout", condition="Invalid session data"))
         case "None":
             return redirect(urlFor("auth._auth_login"))
         case "Add 2fa":
@@ -373,7 +345,6 @@ def _auth_password_reset() -> str | Response:
         Response: The styled password reset page with the correct messages
         str: The password reset page
     """
-    endpointLogger.logRequest(request)
 
     # Hande cookie check
     cookieCheck: str = _cookieCheck(session)
@@ -427,7 +398,6 @@ def _auth_logout(condition: str | None = None) -> str:
     Returns:
         Response: The styled logout page with the correct messages
     """
-    endpointLogger.logRequest(request)
 
     # Clear the session
     session.clear()
