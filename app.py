@@ -53,23 +53,6 @@ def _cookieCheck(data: SessionMixin) -> str:
     if len(data) == 0:
         return "None"
 
-    if "id" not in data:
-        return "Invalid Session"
-
-    if not database.checkUserExists(data["id"]):
-        return "Invalid User"
-
-    user: User = database.getUser(data["id"])
-
-    if user.banned:
-        return "Banned"
-
-    if "2fa" not in data and user.otpKey != "":
-        return "2FA Required"
-
-    if "2fa" not in data and user.otpKey == "":
-        return "Add 2FA"
-
     return "Valid"
 
 
@@ -299,8 +282,6 @@ def _auth_add_2fa() -> str | Response:
             return redirect(urlFor("_index"))
         case "None":
             return redirect(urlFor("auth._auth_login"))
-        case "Add 2fa":
-            pass
 
     # Handle GET first
     if request.method == "GET":
@@ -352,14 +333,6 @@ def _auth_password_reset() -> str | Response:
     match cookieCheck:
         case "Valid":
             return redirect(urlFor("_index"))
-        case "2FA Required":
-            return redirect(urlFor("auth._auth_logout", condition="Invalid session data"))
-        case "Banned":
-            return redirect(urlFor("auth._auth_logout", condition="Banned"))
-        case "Invalid User":
-            return redirect(urlFor("auth._auth_logout", condition="Invalid session data"))
-        case "Invalid Session":
-            return redirect(urlFor("auth._auth_logout", condition="Invalid session data"))
         case "None":
             pass
 
