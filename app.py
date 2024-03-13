@@ -112,6 +112,7 @@ def _before_request() -> Response | None:
         return
 
     if "2fa" not in session:
+        session["2fa"] = False
         return redirect(urlFor("auth._auth_add_2fa"))
 
     # Get the user to perform more checks
@@ -142,7 +143,7 @@ def _after_request(response: Response) -> Response:
         Response: The response to send.
     """
     # Log the response
-    endpointLogger.logResponse(response)
+    # endpointLogger.logResponse(response)
 
     return response
 
