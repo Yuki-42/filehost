@@ -11,6 +11,22 @@
     <script type="text/javascript" src="{{ url_for("static", filename="js/hamburger.js") }}"></script>
     {% block scripts %}{% endblock %}
 </head>
+<header>
+    <div id="top-nav">
+        <nav>
+            <ul>
+                <li><a href="{{ url_for("info._info_index") }}">Home</a></li>
+                <li><a href="{{ url_for("info._info_about") }}">About</a></li>
+                <li><a href="{{ url_for("info._info_contact") }}">Contact</a></li>
+                {% if session and session["id"] %}
+                    <li><a href="{{ url_for("auth._auth_logout") }}">Logout</a></li>
+                {% else %}
+                    <li><a href="{{ url_for("auth._auth_login") }}">Login</a></li>
+                {% endif %}
+            </ul>
+        </nav>
+    </div>
+</header>
 <body>
     {% block content %}{% endblock %}
 </body>
