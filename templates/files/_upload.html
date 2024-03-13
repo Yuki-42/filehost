@@ -1,0 +1,37 @@
+{% extends "_base.html" %}
+{% block title %}Upload{% endblock %}
+
+{% block stylesheets %}
+
+{% endblock %}
+
+{% block scripts %}
+
+{% endblock %}
+
+{% block content %}
+    {% if bulk %}
+        <h1>Bulk Upload</h1>
+        <form action="{{ url_for("files._files_upload") }}" method="POST" enctype="multipart/form-data">
+            <button type="button" id="add" onabort="addElement()">Add</button>
+            <div id="file-container">
+                <table id="file-table">
+                    <tr>
+                        <th>File</th>
+                        <th>Remove</th>
+                    </tr>
+                </table>
+            </div>
+            <input type="submit" value="Upload">
+        </form>
+    {% else %}
+        <h1>Upload</h1>
+        <form action="{{ url_for("files._files_upload_bulk") }}" method="POST" enctype="multipart/form-data">
+            <input type="file" name="file" id="file">
+            <input type="submit" value="Upload">
+        </form>
+        <p>{{ message }}</p>
+        <p><a href="{{ url_for("index") }}">Back to index</a></p>
+    {% endif %}
+
+{% endblock %}
