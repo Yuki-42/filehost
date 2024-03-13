@@ -10,6 +10,7 @@ from flask import Flask, render_template as renderTemplate, Blueprint, Response,
 from flask.sessions import SessionMixin
 from pyotp import TOTP, random_base32 as otpKey
 from werkzeug import Response
+from werkzeug.datastructures import FileStorage
 
 # Local Imports
 from internals.config import Config
@@ -38,6 +39,7 @@ app.secret_key = tokenUrlSafe(128) if not config.debug else "debug"
 
 # Create Blueprints
 authBlueprint: Blueprint = Blueprint("auth", __name__, url_prefix="/auth")
+filesBlueprint: Blueprint = Blueprint("files", __name__, url_prefix="/files")
 
 
 def _cookieCheck(data: SessionMixin) -> str:
@@ -54,6 +56,16 @@ def _cookieCheck(data: SessionMixin) -> str:
         return "None"
 
     return "Valid"
+
+
+def _canAdd2fa(data: SessionMixin) -> bool:
+    """
+    Check if the user can add 2FA.
+
+    Returns:
+        bool: If the user can add 2FA.
+    """
+    return "2fa" not in data or not data["2fa"]
 
 
 def _verifyForm(form: dict, fields: list) -> tuple[bool, str, int]:
@@ -89,25 +101,32 @@ def _before_request() -> Response | None:
     # Log the request
     endpointLogger.logRequest(request)
 
+    # Protection against weirdness around static files
+    if request.endpoint == "static":
+        return
+
     # Clear invalid sessions
     if len(session) <= 0 or "id" not in session or not database.checkUserExists(session["id"]):
         session.clear()
         return
 
+    if "2fa" not in session:
+        return redirect(urlFor("auth._auth_add_2fa"))
+
     # Get the user to perform more checks
     user: User = database.getUser(session["id"])
+
+    logger.debug(f"Session Data: {session}")
 
     if user.banned:
         session.clear()
         return redirect(urlFor("auth._auth_logout", condition="Banned"))
 
-    if "2fa" not in session and user.otpKey != "":
-        session.clear()
-        return redirect(urlFor("auth._auth_login"))
+    logger.debug(f"User: {user}")
 
-    if "2fa" not in session and user.otpKey == "":
-        session.clear()
-        return redirect(urlFor("auth._auth_add_2fa"))
+    if user.otpKey == "":
+        session["2fa"] = False
+        return redirect(urlFor("auth._auth_add_2fa")) if request.endpoint != "auth._auth_add_2fa" else None
 
 
 @app.after_request
@@ -274,20 +293,15 @@ def _auth_add_2fa() -> str | Response:
         str: The 2FA add page
     """
 
-    # Hande cookie check
-    cookieCheck: str = _cookieCheck(session)
-
-    match cookieCheck:
-        case "Valid":
-            return redirect(urlFor("_index"))
-        case "None":
-            return redirect(urlFor("auth._auth_login"))
+    # Ensure user is logged in
+    if not _canAdd2fa(session):
+        return redirect(urlFor("auth._auth_login"))
 
     # Handle GET first
     if request.method == "GET":
         # Create a new TOTP
         key: str = otpKey()
-        url: str = TOTP(key).provisioning_uri(database.getUserByEmail(session["id"]).email, issuer_name="Filehost")
+        url: str = TOTP(key).provisioning_uri(database.getUser(session["id"]).email, issuer_name="Filehost")
 
         # Set the session
         session["2faKey"] = key
@@ -379,6 +393,70 @@ def _auth_logout(condition: str | None = None) -> str:
     return renderTemplate("auth/logout.html", condition=condition)
 
 
+@filesBlueprint.route("/upload", methods=["GET", "POST"])
+@filesBlueprint.route("/upload/", methods=["GET", "POST"])
+def _files_upload() -> str | Response:
+    """
+    The upload page. This is where the user can upload files to their account.
+
+    Returns:
+        Response: The styled upload page with the correct messages
+        str: The upload page
+    """
+
+    # Hande cookie check
+    cookieCheck: str = _cookieCheck(session)
+
+    match cookieCheck:
+        case "Valid":
+            pass
+        case "None":
+            return redirect(urlFor("auth._auth_login"))
+
+    # Handle GET first
+    if request.method == "GET":
+        return renderTemplate("files/upload.html")
+
+    # Request is POST
+    formFields: list = ["file"]
+
+    if "file" not in request.files:
+        return renderTemplate("files/upload.html", error="No file uploaded")
+
+    file: FileStorage = request.files["file"]
+
+
+@filesBlueprint.route("/upload/bulk", methods=["GET", "POST"])
+@filesBlueprint.route("/upload/bulk/", methods=["GET", "POST"])
+def _files_upload_bulk() -> str | Response:
+    """
+    The bulk upload page. This is where the user can upload multiple files to their account.
+
+    Returns:
+        Response: The styled bulk upload page with the correct messages
+        str: The bulk upload page
+    """
+
+    # Hande cookie check
+    cookieCheck: str = _cookieCheck(session)
+
+    match cookieCheck:
+        case "Valid":
+            pass
+        case "None":
+            return redirect(urlFor("auth._auth_login"))
+
+    # Handle GET first
+    if request.method == "GET":
+        return renderTemplate("files/upload.html", bulk=True)
+
+    # Request is POST
+    formFields: list = ["files"]
+
+    if "files" not in request.files:
+        return renderTemplate("files/upload.html", bulk=True, error="No files uploaded")
+
+
 @app.route("/test/<string:template>")
 def _test(template: str) -> str:
     """
@@ -395,6 +473,7 @@ def _test(template: str) -> str:
 
 # Register Blueprints
 app.register_blueprint(authBlueprint)
+app.register_blueprint(filesBlueprint)
 
 if __name__ == "__main__":
     # Run the app
