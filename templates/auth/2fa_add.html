@@ -14,6 +14,9 @@
                 <input type="text" class="form-control" id="2fa" name="2fa" placeholder="2fa">
             </div>
             <button type="submit" class="btn btn-primary">Add 2fa</button>
+            {% if error %}
+                <p class="error">{{ error }}</p>
+            {% endif %}
         </form>
     </div>
 {% endblock %}
