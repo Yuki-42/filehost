@@ -225,13 +225,13 @@ class Database:
         self.connection.commit()
         cursor.close()
 
-    def setUserOtpKey(self, key: str, id: int) -> None:
+    def setUserOtpKey(self, id: int, key: str) -> None:
         """
         Set the OTP key of a user in the database.
 
         Args:
-            key (str): The OTP key to set.
             id (int): The id of the user.
+            key (str): The OTP key to set.
         """
         # Create cursor
         cursor: Cursor = self.connection.cursor()
