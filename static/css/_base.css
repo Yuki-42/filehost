@@ -1,9 +1,5 @@
 /* Base CSS */
 
-/*
-Stolen from InactiveGaming13 on GitHub.
- */
-
 html, body {
     width: 100%;
     min-height: 100vh;
@@ -56,6 +52,36 @@ footer p {
     position: relative;
     min-height: 80vh;
 }*/
+
+nav {
+    display: flex;
+    padding: 15px 15px 10px 15px;
+}
+
+.navbar-icon {
+    max-width: 50px;
+    max-height: 50px;
+    width: max-content;
+    height: max-content;
+}
+
+nav > ul {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 60px;
+}
+
+nav > ul > li {
+    list-style: none;
+}
+
+nav > ul > li > a {
+    color: white;
+    text-decoration: none;
+    transition: color 0.5s, border-bottom 0.5s;
+    position: relative;
+}
 
 .horizontalCenter {
     text-align: center;
