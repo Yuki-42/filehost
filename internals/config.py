@@ -201,3 +201,13 @@ class Config:
             str: Email password.
         """
         return self.cache["EMAIL_PASSWORD"]
+
+    @property
+    def hostEmail(self) -> str:
+        """
+        Host email.
+
+        Returns:
+            str: Host email.
+        """
+        return self.cache["HOST_EMAIL"]
