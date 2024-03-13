@@ -38,6 +38,7 @@ app.debug = config.debug
 app.secret_key = tokenUrlSafe(128) if not config.debug else "debug"
 
 # Create Blueprints
+infoBlueprint: Blueprint = Blueprint("info", __name__)  # Used for routes such as index and about
 authBlueprint: Blueprint = Blueprint("auth", __name__, url_prefix="/auth")
 filesBlueprint: Blueprint = Blueprint("files", __name__, url_prefix="/files")
 
@@ -146,15 +147,44 @@ def _after_request(response: Response) -> Response:
     return response
 
 
-@app.route("/", methods=["GET"])
-def _index() -> str:
+"""
+================================================================================================================================================================
+    Info Routes
+================================================================================================================================================================
+"""
+
+
+@infoBlueprint.route("/", methods=["GET"])
+def _info_index() -> str:
     """
     Index route.
     
     Returns:
         str: Index route message.
     """
-    return renderTemplate("index.html")
+    return renderTemplate("info/index.html")
+
+
+@infoBlueprint.route("/about", methods=["GET"])
+def _info_about() -> str:
+    """
+    About route.
+
+    Returns:
+        str: About route message.
+    """
+    return renderTemplate("info/about.html")
+
+
+@infoBlueprint.route("/contact", methods=["GET"])
+def _info_contact() -> str:
+    """
+    Contact route.
+
+    Returns:
+        str: Contact route message.
+    """
+    return renderTemplate("info/contact.html")
 
 
 """
@@ -182,7 +212,7 @@ def _auth_login() -> str | Response:
 
     match cookieCheck:
         case "Valid":
-            return redirect(urlFor("_index"))  # Logged-in users cannot access the login page
+            return redirect(urlFor("info._info_index"))  # Logged-in users cannot access the login page
         case "None":
             pass
 
@@ -227,7 +257,7 @@ def _auth_login() -> str | Response:
     session["2fa"] = True
 
     # Redirect to the index
-    return redirect(urlFor("_index"))
+    return redirect(urlFor("info._info_index"))
 
 
 @authBlueprint.route("/register", methods=["GET", "POST"])
@@ -246,7 +276,7 @@ def _auth_register() -> str | Response:
 
     match cookieCheck:
         case "Valid":
-            return redirect(urlFor("_index"))  # Logged-in users cannot access the register page
+            return redirect(urlFor("info._info_index"))  # Logged-in users cannot access the register page
         case "None":
             pass
 
@@ -327,7 +357,7 @@ def _auth_add_2fa() -> str | Response:
     session.pop("2faKey")
 
     # Redirect to the index
-    return redirect(urlFor("_index"))
+    return redirect(urlFor("info._info_index"))
 
 
 @authBlueprint.route("/password/reset", methods=["GET", "POST"])
@@ -346,7 +376,7 @@ def _auth_password_reset() -> str | Response:
 
     match cookieCheck:
         case "Valid":
-            return redirect(urlFor("_index"))
+            return redirect(urlFor("info._info_index"))
         case "None":
             pass
 
@@ -472,6 +502,7 @@ def _test(template: str) -> str:
 
 
 # Register Blueprints
+app.register_blueprint(infoBlueprint)
 app.register_blueprint(authBlueprint)
 app.register_blueprint(filesBlueprint)
 
