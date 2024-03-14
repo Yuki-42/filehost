@@ -4,3 +4,4 @@ python-dotenv
 passlib
 Flask-WTF
 pyotp
+gunicorn
