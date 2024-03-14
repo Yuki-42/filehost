@@ -68,14 +68,34 @@ class Config:
                 raise Exception(f"Missing required property: {_property}")
 
     @property
-    def hostname(self) -> str:
+    def host(self) -> str:
+        """
+        Host ip.
+
+        Returns:
+            str: Host.
+        """
+        return self.cache["HOST"]
+
+    @property
+    def port(self) -> int:
+        """
+        Port.
+
+        Returns:
+            int: Port.
+        """
+        return int(self.cache["PORT"])
+
+    @property
+    def domain(self) -> str:
         """
         Hostname.
 
         Returns:
             str: Hostname.
         """
-        return self.cache["HOSTNAME"]
+        return self.cache["DOMAIN"]
 
     @property
     def https(self) -> bool:
