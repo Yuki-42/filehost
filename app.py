@@ -16,6 +16,7 @@ from werkzeug.datastructures import FileStorage
 from internals.config import Config
 from internals.database import Database
 from internals.logging import createLogger, SuppressedLoggerAdapter, EndpointLoggerAdapter
+from internals.models.file import File
 from internals.models.user import User
 
 # Create App Logger
@@ -485,7 +486,39 @@ def _files_upload_bulk() -> str | Response:
     formFields: list = ["files"]
 
     if "files" not in request.files:
-        return renderTemplate("files/upload.html", bulk=True, error="No files uploaded")
+        return renderTemplate("files/upload.html", bulk=True, error="No files uploaded")  # TODO: finish this
+
+
+@filesBlueprint.route("/<string:file>", methods=["GET"])
+@filesBlueprint.route("/<string:file>/", methods=["GET"])
+def _files_get(file: str) -> str | Response:
+    """
+    The file page. This is where the user can view a file.
+
+    Args:
+        file (str): The file to view.
+
+    Returns:
+        Response: The styled file page with the correct messages
+        str: The file page
+    """
+
+    # Hande cookie check
+    cookieCheck: str = _cookieCheck(session)
+
+    match cookieCheck:
+        case "Valid":
+            pass
+        case "None":
+            return redirect(urlFor("auth._auth_login"))
+
+    # Get the file
+    fileData: File = database.getFileByToken(file)
+
+    if fileData is None:
+        return renderTemplate("files/file.html", error="File not found")
+
+    return renderTemplate("files/file.html", file=fileData)
 
 
 @app.route("/test/<string:template>")
