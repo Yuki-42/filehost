@@ -53,12 +53,39 @@ class Config:
             "DB_PASS",
             "DB_HOST",
             "DB_PORT",
-            "DB_NAME"
+            "DB_NAME",
+            "EMAIL_USER",
+            "EMAIL_HOST",
+            "EMAIL_PORT",
+            "EMAIL_PASSWORD",
+            "HOST_EMAIL",
+            "HOSTNAME",
+            "HTTPS"
         ]
 
         for _property in requiredProperties:
             if _property not in self.cache:
                 raise Exception(f"Missing required property: {_property}")
+
+    @property
+    def hostname(self) -> str:
+        """
+        Hostname.
+
+        Returns:
+            str: Hostname.
+        """
+        return self.cache["HOSTNAME"]
+
+    @property
+    def https(self) -> bool:
+        """
+        HTTPS.
+
+        Returns:
+            bool: HTTPS.
+        """
+        return self.cache.get("HTTPS", "False").lower() == "true"
 
     @property
     def dbUser(self) -> str:
