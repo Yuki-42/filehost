@@ -283,5 +283,36 @@ class Database:
 
         return File(result[0], result[1], result[2], result[3], result[4], result[5], result[6], result[7], file, user) if result else None
 
+    def getFileByToken(self, token: str) -> File | None:
+        """
+        Get a file from the database by its token.
 
+        Args:
+            token (str): The token of the file to get.
 
+        Returns:
+            File: The file with the given token.
+        """
+
+        # Create cursor
+        cursor: Cursor = self.connection.cursor()
+
+        # Execute query
+        cursor.execute("SELECT * FROM files WHERE token = %s;", (token,))
+
+        # Fetch one result
+        result: tuple = cursor.fetchone()
+
+        # Get the user
+        user: User = self.getUser(result[3])
+
+        # Get the file
+        if result[5] == 1:
+            cursor.execute("SELECT data FROM small_files WHERE id = %s;", (result[0],))
+        else:
+            cursor.execute("SELECT data FROM large_files WHERE id = %s;", (result[0],))
+
+        file: BytesIO = BytesIO(cursor.fetchone()[0])
+        cursor.close()
+
+        return File(result[0], result[1], result[2], result[3], result[4], result[5], result[6], result[7], file, user) if result else None
