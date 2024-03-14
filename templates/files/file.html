@@ -1,0 +1,56 @@
+{% extends "_base.html" %}
+
+{% block title %}File {{ file.name }}{% endblock %}
+
+{% block meta %}
+    <meta property="og:title" content="File {{ file.name }} uploaded by {{ file.user.username }}">
+    <meta property="og:url" content="{{ file.url }}">
+    <meta property="og:site_name" content="Filehost">
+    <meta property="og:description" content="{{ file.description }}">
+    <meta name="theme-color" content="#{{ file.color }}">
+    {% if file.type in ["image", "video"] %}
+        <meta property="og:image" content="{{ file.thumbnail.url }}">
+        <meta property="og:image:width" content="{{ file.thumbnail.width }}">
+        <meta property="og:image:height" content="{{ file.thumbnail.height }}">
+        {% if file.type == "video" %}
+            <meta property="og:video" content="{{ file.url }}">
+            <meta property="og:video:width" content="{{ file.width }}">
+            <meta property="og:video:height" content="{{ file.height }}">
+            <meta property="og:type" content="video.other">
+        {% endif %}
+    {% elif file.type == "archive" %}
+        <meta property="og:image" content="{{ url_for("static", filename="img/archive.png") }}">
+        <meta property="og:image:width" content="256">
+        <meta property="og:image:height" content="256">
+    {% else %}
+        <meta property="og:image" content="{{ url_for("static", filename="img/file.png") }}">
+        <meta property="og:image:width" content="256">
+        <meta property="og:image:height" content="256">
+    {% endif %}
+{% endblock %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" href="{{ url_for("static", filename="css/files.css") }}">
+{% endblock %}
+
+{% block content %}
+    {% if file.type == "video" %}
+        <video id="video" controls>
+            <source src="{{ file.url }}" type="{{ file.mime }}">
+            Your browser does not support the video tag.
+        </video>
+        <label for="quality"></label>  <!-- This is only here to make pycharm shut up -->
+        <select id="quality">
+            {% for quality in file.qualities %}
+                <option value="{{ quality.url }}">{{ quality.name }}</option>
+            {% endfor %}
+        </select>
+    {% elif file.type == "image" %}
+        <img src="{{ file.url }}" alt="{{ file.name }}">
+    {% elif file.type == "archive" %}
+        <img src="{{ url_for("static", filename="img/archive.png") }}" alt="{{ file.name }}">
+    {% else %}
+        <img src="{{ url_for("static", filename="img/file.png") }}" alt="{{ file.name }}">
+    {% endif %}
+    <button id="download" class="download" onclick="download({{ file.url }});">Download</button>
+{% endblock %}
