@@ -29,6 +29,7 @@ class File:
     createdAt: datetime
     file: BytesIO
     url: str
+    type: str
 
     def __init__(
             self,
@@ -39,8 +40,9 @@ class File:
             description: str | None,
             authorId: int,
             public: bool,
-            fileType: int,
+            fileSize: int,
             fileId: int,
+            fileType: str,
             createdAt: datetime,
             file: BytesIO,
             user: User
@@ -55,8 +57,9 @@ class File:
             description (str): File description.
             authorId (int): File author ID.
             public (bool): File public status.
-            fileType (int): File type.
+            fileSize (int): File size.
             fileId (int): File ID.
+            fileType (str): File type.
             createdAt (datetime): File created at.
             file (BytesIO): File data.
             user (User): File author.
@@ -69,13 +72,12 @@ class File:
         self.description = description if description else ""
         self.authorId = authorId
         self.public = public
-        self.fileType = fileType
+        self.fileType = fileSize
         self.fileId = fileId
+        self.type = fileType
         self.createdAt = createdAt
         self.file = file
         self.author = user
 
         # Set URL
         self.url = f"{'https://' if config.https else 'http://'}{config.hostname}/files/{self.token}"
-
-
