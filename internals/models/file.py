@@ -8,6 +8,7 @@ from io import BytesIO
 
 # Local Imports
 from .user import User
+from ..config import Config
 
 
 class File:
@@ -17,6 +18,7 @@ class File:
 
     # Type Hints
     id: int
+    token: str
     name: str
     description: str
     authorId: int
@@ -26,10 +28,13 @@ class File:
     fileId: int
     createdAt: datetime
     file: BytesIO
+    url: str
 
     def __init__(
             self,
+            config: Config,
             id: int,
+            token: str,
             name: str,
             description: str | None,
             authorId: int,
@@ -45,6 +50,7 @@ class File:
 
         Args:
             id (int): File ID.
+            token (str): File token.
             name (str): File name.
             description (str): File description.
             authorId (int): File author ID.
@@ -58,8 +64,9 @@ class File:
 
         # Set properties
         self.id = id
+        self.token = token
         self.name = name
-        self.description = description
+        self.description = description if description else ""
         self.authorId = authorId
         self.public = public
         self.fileType = fileType
@@ -67,3 +74,8 @@ class File:
         self.createdAt = createdAt
         self.file = file
         self.author = user
+
+        # Set URL
+        self.url = f"{'https://' if config.https else 'http://'}{config.hostname}/files/{self.token}"
+
+
