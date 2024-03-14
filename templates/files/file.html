@@ -3,11 +3,10 @@
 {% block title %}File {{ file.name }}{% endblock %}
 
 {% block meta %}
-    <meta property="og:title" content="File {{ file.name }} uploaded by {{ file.user.username }}">
+    <meta property="og:title" content="File {{ file.name }} uploaded by {{ file.author.username }}">
     <meta property="og:url" content="{{ file.url }}">
     <meta property="og:site_name" content="Filehost">
     <meta property="og:description" content="{{ file.description }}">
-    <meta name="theme-color" content="#{{ file.color }}">
     {% if file.type in ["image", "video"] %}
         <meta property="og:image" content="{{ file.thumbnail.url }}">
         <meta property="og:image:width" content="{{ file.thumbnail.width }}">
