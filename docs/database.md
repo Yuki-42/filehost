@@ -37,6 +37,7 @@ The `file_type` column is used to determine if the file is stored in the `small_
 | Column Name | Data Type | Default           | Description                               | Extra                | Example             |
 |-------------|-----------|-------------------|-------------------------------------------|----------------------|---------------------|
 | id          | SERIAL    |                   | The unique identifier for the file.       | NOT NULL PRIMARY KEY | 1                   |
+| token       | TEXT      |                   | The token of the file.                    | NOT NULL             |                     |
 | name        | TEXT      |                   | The name of the file.                     | NOT NULL             |                     |
 | description | TEXT      |                   | The description of the file.              |                      |                     |
 | author_id   | INTEGER   |                   | The id of the user who uploaded the file. | NOT NULL             | 1                   |
@@ -48,11 +49,12 @@ The `file_type` column is used to determine if the file is stored in the `small_
 ```postgresql
 CREATE TABLE IF NOT EXISTS files (
     id SERIAL NOT NULL PRIMARY KEY,
+    token TEXT NOT NULL UNIQUE CHECK (LENGTH(token) = 32),
     name TEXT NOT NULL,
     description TEXT,
     author_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     public BOOLEAN DEFAULT TRUE NOT NULL,
-    file_type INTEGER NOT NULL,
+    file_type INTEGER NOT NULL CHECK (file_type IN (1, 2)),
     file_id INTEGER NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
