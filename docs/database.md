@@ -54,8 +54,9 @@ CREATE TABLE IF NOT EXISTS files (
     description TEXT,
     author_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     public BOOLEAN DEFAULT TRUE NOT NULL,
-    file_type INTEGER NOT NULL CHECK (file_type IN (1, 2)),
+    file_size INTEGER NOT NULL CHECK (files.file_size IN (1, 2)),
     file_id INTEGER NOT NULL,
+    file_type TEXT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
 ```
