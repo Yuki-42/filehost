@@ -8,6 +8,7 @@ from psycopg2 import connect, OperationalError
 from passlib.hash import pbkdf2_sha512 as hashing
 from psycopg2.extensions import connection as Connection, cursor as Cursor
 
+from .config import Config
 # Local Imports
 from .logging import createLogger, SuppressedLoggerAdapter
 from .models.file import File
@@ -21,37 +22,31 @@ class Database:
     # Type Hints
     connection: Connection
     logger: SuppressedLoggerAdapter
+    config: Config
 
     def __init__(
             self,
-            user: str,
-            password: str,
-            host: str,
-            port: int,
-            database: str
+            config: Config
     ) -> None:
         """
         Database class constructor
 
         Args:
-            user (str): Database user.
-            password (str): Database password.
-            host (str): Database host.
-            port (int): Database port.
-            database (str): Database name.
+            config (Config): The application configuration.
         """
         # Set properties
         self.logger = createLogger(__name__)
+        self.config = config
         self.logger.info("Creating database connection...")
 
         try:
             # Create connection
             self.connection = connect(
-                user=user,
-                password=password,
-                host=host,
-                port=port,
-                database=database
+                user=config.dbUser,
+                password=config.dbPassword,
+                host=config.dbHost,
+                port=config.dbPort,
+                database=config.dbDatabase
             )
         except OperationalError as e:
             self.logger.error(f"Error creating database connection: {e}")
@@ -281,7 +276,7 @@ class Database:
         file: BytesIO = BytesIO(cursor.fetchone()[0])
         cursor.close()
 
-        return File(result[0], result[1], result[2], result[3], result[4], result[5], result[6], result[7], file, user) if result else None
+        return File(self.config, result[0], result[1], result[2], result[3], result[4], result[5], result[6], result[7], file, user) if result else None
 
     def getFileByToken(self, token: str) -> File | None:
         """
@@ -315,4 +310,4 @@ class Database:
         file: BytesIO = BytesIO(cursor.fetchone()[0])
         cursor.close()
 
-        return File(result[0], result[1], result[2], result[3], result[4], result[5], result[6], result[7], file, user) if result else None
+        return File(self.config, result[0], result[1], result[2], result[3], result[4], result[5], result[6], result[7], file, user) if result else None
