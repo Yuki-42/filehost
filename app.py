@@ -11,6 +11,7 @@ from flask.sessions import SessionMixin
 from pyotp import TOTP, random_base32 as otpKey
 from werkzeug import Response
 from werkzeug.datastructures import FileStorage
+from werkzeug.middleware.proxy_fix import ProxyFix
 
 # Local Imports
 from internals.config import Config
@@ -34,6 +35,13 @@ database: Database = Database(config)
 app: Flask = Flask(__name__)
 app.template_folder = "templates"
 app.debug = config.debug
+# app.wsgi_app = ProxyFix(
+#     app.wsgi_app,
+#     x_for=1,
+#     x_proto=1,
+#     x_host=1,
+#     x_prefix=1
+# )
 
 # Set Key
 app.secret_key = tokenUrlSafe(128) if not config.debug else "debug"
