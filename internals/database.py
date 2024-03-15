@@ -52,6 +52,8 @@ class Database:
             self.logger.error(f"Error creating database connection: {e}")
             raise e
 
+        self.logger.info("Database connection created.")
+
     """
 ================================================================================================================================================================
         Properties
