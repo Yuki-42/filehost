@@ -313,3 +313,28 @@ class Database:
         cursor.close()
 
         return File(self.config, result[0], result[1], result[2], result[3], result[4], result[5], result[6], result[7], file, user) if result else None
+
+    def getFilesByAuthor(self, userId: int) -> list[File]:
+        """
+        Get all files from the database by their user id.
+
+        Args:
+            userId (int): The id of the user to get files for.
+
+        Returns:
+            list: List of all files with the given user id.
+        """
+
+        # Create cursor
+        cursor: Cursor = self.connection.cursor()
+
+        # Execute query
+        cursor.execute("SELECT * FROM files WHERE author_id = %s;", (userId,))
+
+        # Fetch all results
+        results: list[tuple] = cursor.fetchall()
+
+        # Close cursor
+        cursor.close()
+
+        return [File(self.config, *result) for result in results]

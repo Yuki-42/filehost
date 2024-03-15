@@ -502,6 +502,32 @@ def _files_upload_bulk() -> str | Response:
         return renderTemplate("files/upload.html", bulk=True, error="No files uploaded")  # TODO: finish this
 
 
+@filesBlueprint.route("/", methods=["GET"])
+@filesBlueprint.route("", methods=["GET"])
+def _files_index() -> str | Response:
+    """
+    The files page. This is where the user can view their files.
+
+    Returns:
+        Response: The styled files page with the correct messages
+        str: The files page
+    """
+
+    # Hande cookie check
+    cookieCheck: str = _cookieCheck(session)
+
+    match cookieCheck:
+        case "Valid":
+            pass
+        case "None":
+            return redirect(urlFor("auth._auth_login"))
+
+    # Get the user's files
+    userFiles: list[File] = database.getFilesByAuthor(session["id"])
+
+    return renderTemplate("files/index.html", files=userFiles)
+
+
 @filesBlueprint.route("/<string:file>", methods=["GET"])
 @filesBlueprint.route("/<string:file>/", methods=["GET"])
 def _files_get(file: str) -> str | Response:

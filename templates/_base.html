@@ -8,7 +8,7 @@
     <title>{% block title %}{% endblock %}</title>
     <link rel="stylesheet" href="{{ url_for("static", filename="css/_base.css") }}">
     {% block stylesheets %}{% endblock %}
-<!--<link rel="icon" href="{{ url_for("static", filename="image/TC_White_LOGO.png") }}"> -->
+    <!--<link rel="icon" href="{{ url_for("static", filename="image/TC_White_LOGO.png") }}"> -->
     <script type="text/javascript" src="{{ url_for("static", filename="js/hamburger.js") }}"></script>
     {% block scripts %}{% endblock %}
 </head>
@@ -22,6 +22,8 @@
             <li><a href="{{ url_for("info._info_about") }}">About</a></li>
             <li><a href="{{ url_for("info._info_contact") }}">Contact</a></li>
             {% if session and session["id"] %}
+                <li><a href="{{ url_for("files._files_upload") }}">Upload</a></li>
+                <li><a href="{{ url_for("files._files_index") }}">Files</a></li>
                 <li><a href="{{ url_for("auth._auth_logout") }}">Logout</a></li>
             {% else %}
                 <li><a href="{{ url_for("auth._auth_login") }}">Login</a></li>
