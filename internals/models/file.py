@@ -80,4 +80,4 @@ class File:
         self.author = user
 
         # Set URL
-        self.url = f"{'https://' if config.https else 'http://'}{config.hostname}/files/{self.token}"
+        self.url = f"{'https://' if config.https else 'http://'}{config.domain}/files/{self.token}"
