@@ -59,7 +59,9 @@ class Config:
             "EMAIL_PORT",
             "EMAIL_PASSWORD",
             "HOST_EMAIL",
-            "HOSTNAME",
+            "HOST",
+            "PORT",
+            "DOMAIN",
             "HTTPS"
         ]
 
