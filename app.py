@@ -547,4 +547,4 @@ app.register_blueprint(filesBlueprint)
 
 if __name__ == "__main__":
     # Run the app
-    app.run()
+    app.run(config.host, config.port, config.debug)
